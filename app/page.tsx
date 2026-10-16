@@ -1,7 +1,6 @@
 import { Form } from "@/components/Form";
 import PersonNameCard from "@/components/PersonNameCard";
 import { query } from "@/lib/data";
-import { deletePerson } from "@/server/deletePerson";
 import React, { Suspense } from "react";
 
 interface People {
@@ -13,36 +12,41 @@ interface People {
   employed: boolean;
 }
 
-const page = () => {
+export default function Page() {
   return (
-    <div>
-      People List.
-      <Suspense fallback="Loading People from postgres db">
+    <main className="p-6 space-y-6 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold">People Directory</h1>
+
+      <Suspense
+        fallback={
+          <div className="text-muted-foreground">
+            Loading People from postgres db...
+          </div>
+        }
+      >
         <UsersList />
       </Suspense>
-      <Form />
-    </div>
+
+      <div className="pt-4 border-t">
+        <h2 className="text-lg font-semibold mb-3">Add New Person</h2>
+        <Form />
+      </div>
+    </main>
   );
-};
+}
 
 async function UsersList() {
-  const { rows: rawRows } = await query("select * from people");
+  const { rows: rawRows } = await query(
+    "SELECT * FROM people ORDER BY id DESC",
+  );
   const rows: People[] = JSON.parse(JSON.stringify(rawRows));
 
-  console.log(rows, "Rowss");
-
   return (
-    <div>
+    <div className="space-y-3">
       {rows.map(
         (person) =>
-          person.id && (
-            <div key={person.id}>
-              <PersonNameCard person={person} />
-            </div>
-          ),
+          person.id && <PersonNameCard key={person.id} person={person} />,
       )}
     </div>
   );
 }
-
-export default page;
