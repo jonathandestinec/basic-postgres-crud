@@ -1,6 +1,7 @@
 import { Form } from "@/components/Form";
 import PersonNameCard from "@/components/PersonNameCard";
 import { query } from "@/lib/data";
+import { createTable } from "@/server/createTable";
 import React, { Suspense } from "react";
 
 interface People {
@@ -36,6 +37,8 @@ export default function Page() {
 }
 
 async function UsersList() {
+  // await createTable();
+
   const { rows: rawRows } = await query(
     "SELECT * FROM people ORDER BY id DESC",
   );

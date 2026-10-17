@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -23,6 +24,13 @@ import { Input } from "@/components/ui/input";
 import { toast } from "./ui/toast";
 import { query } from "@/lib/data";
 import { addPerson } from "@/server/addPerson";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters."),
@@ -31,18 +39,11 @@ const formSchema = z.object({
     .number()
     .min(1, "Age must be at least 1.")
     .max(120, "Please enter a valid age."),
+  isEmployed: z.enum(["Employed", "Unemployed"]),
+  jobTitle: z.string().min(2, "Job title must be at least 2 characters."),
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-interface People {
-  id: number;
-  first_name: string;
-  last_name: string;
-  age: number;
-  job: string;
-  employed: boolean;
-}
 
 const formResolver: Resolver<FormValues> = async (values) => {
   const result = formSchema.safeParse(values);
@@ -75,6 +76,8 @@ export function Form() {
       firstName: "",
       lastName: "",
       age: "" as unknown as number,
+      isEmployed: "Employed",
+      jobTitle: "",
       // Keeps initial input blank instead of showing 0
     },
   });
@@ -84,12 +87,7 @@ export function Form() {
     addPerson({ error: error, success: success }, data);
 
     toast.add({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 text-code-foreground">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
+      title: "You submitted the form"
     });
   }
 
@@ -139,6 +137,59 @@ export function Form() {
                     placeholder="Doe"
                     autoComplete="family-name"
                   />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            {/* Job Title Field */}
+            <Controller
+              name="jobTitle"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="JobTitle">Job</FieldLabel>
+                  <Input
+                    {...field}
+                    id="jobTitle"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Software Developer"
+                    autoComplete="job"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            {/* Employment status field */}
+            <Controller
+              name="isEmployed"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-complex-billingPeriod">
+                    Employment Status
+                  </FieldLabel>
+                  <Select
+                    name={field.name}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger
+                      id="form-rhf-complex-billingPeriod"
+                      aria-invalid={fieldState.invalid}
+                    >
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Employed">Employed</SelectItem>
+                      <SelectItem value="Unemployed">Unemployed</SelectItem>
+                    </SelectContent>
+                  </Select>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}

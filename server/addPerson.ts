@@ -10,13 +10,17 @@ export async function addPerson(
     firstName: string;
     lastName: string;
     age: number;
+    isEmployed: "Employed" | "Unemployed";
+    jobTitle: string;
   },
 ): Promise<State> {
   const firstName = String(formData.firstName ?? "").trim();
   const lastName = String(formData.lastName ?? "");
-  const age = String(formData.age ?? "")
-    .trim()
-    .toLowerCase();
+  const age = String(formData.age ?? "");
+  const isEmployed = String(formData.isEmployed ?? "").trim();
+  const jobTitle = String(formData.jobTitle ?? "").trim();
+
+  const employmentStatus = isEmployed === "Employed" ? true : false;
 
   if (!firstName || !lastName || !age) {
     return { error: "Enter a name and a valid email." };
@@ -24,8 +28,8 @@ export async function addPerson(
 
   try {
     await query(
-      "INSERT INTO people (first_name, last_name, age) VALUES ($1, $2, $3)",
-      [firstName, lastName, age],
+      "INSERT INTO people (first_name, last_name, age, employed, job) VALUES ($1, $2, $3, $4, $5)",
+      [firstName, lastName, age, employmentStatus, jobTitle],
     );
   } catch (e: unknown) {
     // 23505 = unique_violation in Postgres
